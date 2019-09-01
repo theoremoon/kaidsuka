@@ -1,0 +1,6 @@
+code.sajari.com/word2vec v1.0.0 h1:gg1Bk3ea3mGPZMS2/qh1iPJM5iotSSHyIxq4gUdlH+0=
+code.sajari.com/word2vec v1.0.0/go.mod h1:Ut8mx+2Q79Js3uGW1+HtbuuUIWoGMAMCOZK06xDly00=
+github.com/ikawaha/kagome v1.10.0 h1:1cy/LhnxURvq6vIo558QagpaAGEPo3aFpSywR+eVf04=
+github.com/ikawaha/kagome v1.10.0/go.mod h1:eEV1yEy8Hm2eJRMz6nU1OlbrafRqXTECbsmm9aUMX2s=
+github.com/ziutek/blas v0.0.0-20190227122918-da4ca23e90bb h1:uWiILQloLUVdtPYr1ZZo2zqtlpzo4G8vUpglo/Fs2H8=
+github.com/ziutek/blas v0.0.0-20190227122918-da4ca23e90bb/go.mod h1:J3xKssoVdrwZ2E29fIox/EKxOZWimS7AZ4fOTCFkOLo=
