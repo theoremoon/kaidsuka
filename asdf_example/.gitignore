@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/jsonizer_examples
+jsonizer_examples.so
+jsonizer_examples.dylib
+jsonizer_examples.dll
+jsonizer_examples.a
+jsonizer_examples.lib
+jsonizer_examples-test-*
+*.exe
+*.o
+*.obj
+*.lst

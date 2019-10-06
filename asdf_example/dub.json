@@ -1,0 +1,11 @@
+{
+	"authors": [
+		"theoremoon"
+	],
+	"dependencies": {
+		"asdf": "~>0.5.2"
+	},
+	"description": "A minimal D application.",
+	"license": "Public Domain",
+	"name": "asdf_example"
+}
