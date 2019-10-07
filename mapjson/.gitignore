@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/mapjson
+mapjson.so
+mapjson.dylib
+mapjson.dll
+mapjson.a
+mapjson.lib
+mapjson-test-*
+*.exe
+*.o
+*.obj
+*.lst
