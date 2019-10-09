@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/to_integral
+to_integral.so
+to_integral.dylib
+to_integral.dll
+to_integral.a
+to_integral.lib
+to_integral-test-*
+*.exe
+*.o
+*.obj
+*.lst
