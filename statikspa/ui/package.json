@@ -1,0 +1,12 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "theoremoon",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "node-elm-compiler": "^5.0.4",
+    "parcel": "^1.12.4"
+  },
+  "dependencies": {}
+}
