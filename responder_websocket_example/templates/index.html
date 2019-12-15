@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>WebSocket Example</h1>
+    <p>Socket Status: <span id="status">N/A</span></p>
+    <p>message: <input type="text" id="msg" /><button id="btn">send</button></p>
+    <div id="list">
+    </div>
+
+    <script>
+        const status = document.querySelector('#status');
+        const msg = document.querySelector('#msg');
+        const btn = document.querySelector('#btn');
+        const list = document.querySelector('#list');
+
+        let msgs = [];
+
+        const redraw = () => {
+            while (list.firstChild) {
+                list.removeChild(list.firstChild);
+            }
+            for (let i = msgs.length - 1; i >= 0; i--) {
+                let div = document.createElement('div');
+                div.appendChild(document.createTextNode(msgs[i]));
+                list.appendChild(div);
+            }
+        };
+
+        const ws = new WebSocket("ws://localhost:5042/ws");
+        ws.addEventListener('open', () => {
+            status.innerText = 'CONNECTED';
+        });
+        ws.addEventListener('close', () => {
+            status.innerText = 'CLOSED';
+        });
+        ws.addEventListener('message', (m) => {
+            msgs.push(new Date().toString() + m.data);
+            redraw();
+        });
+
+        btn.addEventListener('click', () => {
+            ws.send(msg.value);
+            msg.value = '';
+        })
+    </script>
+</body>
+</html>
