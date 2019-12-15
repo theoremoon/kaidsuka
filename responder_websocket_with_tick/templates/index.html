@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="list"></div>
+    <script>
+        const list = document.querySelector('#list');
+        let msgs = [];
+
+        const redraw = () => {
+            while (list.firstChild) {
+                list.removeChild(list.firstChild);
+            }
+            for (let i = msgs.length - 1; i >= 0; i--) {
+                let div = document.createElement('div');
+                div.appendChild( document.createTextNode(msgs[i]) );
+                list.appendChild(div);
+            }
+        };
+
+        const ws = new WebSocket("ws://localhost:5042/ws");
+        ws.addEventListener('open', () => {
+            console.log('OPENED');
+        })
+        ws.addEventListener('message', (m) => {
+            const data = JSON.parse(m.data);
+            msgs.push(data.msg);
+            redraw();
+        })
+    </script>
+</body>
+</html>
