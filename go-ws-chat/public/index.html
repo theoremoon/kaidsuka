@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="app">
+        <p>STATUS: {{status}}</p>
+        <form @submit.prevent="sendMsg">
+            <input type="text" v-model="text" />
+            <input type="submit" value="send">
+        </form>
+        <div>
+            <p v-for="m in msgs">{{ m }}</p>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script>
+        let vue = new Vue({
+            el: '#app',
+            data: {
+                ws: null,
+                status: "-",
+                msgs: [],
+                text: "",
+            },
+            mounted() {
+                let uri =(window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+                uri += '//' + window.location.host + window.location.pathname + 'ws';
+                this.ws = new WebSocket(uri);
+                this.ws.addEventListener('open', () => {
+                    this.status = "CONNECTED";
+                });
+                this.ws.addEventListener('close', e => {
+                    this.status = "CLOSED";
+                });
+                this.ws.addEventListener('error', e => {
+                    this.status = "ERROR";
+                });
+                this.ws.addEventListener('message', e => {
+                    this.msgs.unshift(e.data);
+                });
+            },
+            methods: {
+                sendMsg() {
+                    this.ws.send(this.text);
+                    this.text = ""
+                }
+            },
+        });
+
+
+    </script>
+</body>
+</html>
