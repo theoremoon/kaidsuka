@@ -1,0 +1,16 @@
+version: '3'
+services:
+  redis:
+    image: redis:5.0.7-alpine
+    ports:
+      - "6379:6379"
+  server:
+    build:
+      context: .
+    command: "/wscalechat"
+    ports:
+      - "10000-10002:8888"
+    environment:
+      - REDIS=redis:6379
+    depends_on:
+      - redis

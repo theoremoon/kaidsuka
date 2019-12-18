@@ -1,9 +1,15 @@
 package main
 
 import (
+	"html/template"
+	"io"
+	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/Pallinder/go-randomdata"
+	"github.com/go-redis/redis/v7"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -11,58 +17,78 @@ import (
 
 var (
 	upgrader = websocket.Upgrader{}
+	name     = randomdata.SillyName()
 )
 
-type Server struct {
-	Msg     chan []byte
-	Clients map[*Client]struct{}
-	Add     chan *Client
-	Remove  chan *Client
+type server struct {
+	r       *redis.Client
+	msg     chan []byte
+	clients map[*client]struct{}
+	add     chan *client
+	remove  chan *client
 }
 
-func newServer() *Server {
-	return &Server{
-		Msg:     make(chan []byte),
-		Clients: make(map[*Client]struct{}),
-		Add:     make(chan *Client),
-		Remove:  make(chan *Client),
+func newServer(r *redis.Client) *server {
+	return &server{
+		r:       r,
+		msg:     make(chan []byte),
+		clients: make(map[*client]struct{}),
+		add:     make(chan *client),
+		remove:  make(chan *client),
 	}
 }
-func (s *Server) Run() {
+func (s *server) Run() {
+	pubsub := s.r.Subscribe("chat")
+	sub := pubsub.Channel()
 	for {
 		select {
-		case m := <-s.Msg:
-			for c, _ := range s.Clients {
-				c.Msg <- m
+		case m := <-s.msg:
+			s.r.Publish("chat", string(m))
+			// do not send directly, when redis pub/sub system is available
+			// for c, _ := range s.Clients {
+			// 	c.Msg <- m
+			// }
+		case m := <-sub:
+			for c, _ := range s.clients {
+				c.Msg([]byte(m.Payload))
 			}
-		case c := <-s.Add:
-			s.Clients[c] = struct{}{}
-		case c := <-s.Remove:
-			delete(s.Clients, c)
+		case c := <-s.add:
+			s.clients[c] = struct{}{}
+		case c := <-s.remove:
+			delete(s.clients, c)
 		}
 	}
 }
-
-type Client struct {
-	Msg    chan []byte
-	Socket *websocket.Conn
-	Srv    *Server
+func (s *server) Add(c *client) {
+	s.add <- c
+}
+func (s *server) Remove(c *client) {
+	s.remove <- c
 }
 
-func newClient(s *Server, ws *websocket.Conn) *Client {
-	c := &Client{
-		Msg:    make(chan []byte),
-		Socket: ws,
-		Srv:    s,
+type client struct {
+	msg chan []byte
+	ws  *websocket.Conn
+	s   *server
+}
+
+func newClient(s *server, ws *websocket.Conn) *client {
+	c := &client{
+		msg: make(chan []byte),
+		ws:  ws,
+		s:   s,
 	}
-	s.Add <- c
+	s.Add(c)
 	return c
 }
-func (c *Client) Close() {
-	c.Srv.Remove <- c
-	c.Socket.Close()
+func (c *client) Close() {
+	c.s.Remove(c)
+	c.ws.Close()
 }
-func (c *Client) SendHandler() {
+func (c *client) Msg(m []byte) {
+	c.msg <- m
+}
+func (c *client) SendHandler() {
 	defer c.Close()
 
 	t := time.NewTicker(5 * time.Second)
@@ -71,29 +97,29 @@ func (c *Client) SendHandler() {
 	for {
 		select {
 		case <-t.C:
-			if err := c.Socket.WriteControl(websocket.PingMessage, nil, time.Now().Add(10*time.Second)); err != nil {
+			if err := c.ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(10*time.Second)); err != nil {
 				return
 			}
-		case m := <-c.Msg:
-			c.Socket.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if err := c.Socket.WriteMessage(websocket.TextMessage, m); err != nil {
+		case m := <-c.msg:
+			c.ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			if err := c.ws.WriteMessage(websocket.TextMessage, m); err != nil {
 				return
 			}
 		}
 	}
 }
-func (c *Client) ReceiveHandler() {
+func (c *client) ReceiveHandler() {
 	defer c.Close()
 	for {
-		_, m, err := c.Socket.ReadMessage()
+		_, m, err := c.ws.ReadMessage()
 		if err != nil {
 			break
 		}
-		c.Srv.Msg <- m
+		c.s.msg <- m
 	}
 }
 
-func wsConnect(s *Server, c echo.Context) error {
+func wsConnect(s *server, c echo.Context) error {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -105,19 +131,48 @@ func wsConnect(s *Server, c echo.Context) error {
 	return nil
 }
 
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
 func main() {
+	redis_a := os.Getenv("REDIS")
+	if redis_a == "" {
+		redis_a = ":6379"
+	}
+	r := redis.NewClient(&redis.Options{
+		Addr:       redis_a,
+		MaxRetries: 8,
+	})
+	_, err := r.Ping().Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+	srv := newServer(r)
+	go srv.Run()
+
+	e := echo.New()
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob("public/*.html")),
+	}
+
+	e.Use(middleware.Logger())
+	e.GET("/", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "index", map[string]interface{}{
+			"Name": name,
+		})
+	})
+	e.GET("/ws", func(c echo.Context) error {
+		return wsConnect(srv, c)
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
 	}
-	srv := newServer()
-	go srv.Run()
-
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Static("/", "./public")
-	e.GET("/ws", func(c echo.Context) error {
-		return wsConnect(srv, c)
-	})
 	e.Logger.Fatal(e.Start(":" + port))
 }

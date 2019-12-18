@@ -1,3 +1,4 @@
+{{define "index"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,19 +7,21 @@
 </head>
 <body>
     <div id="app">
-        <p>STATUS: {{status}}</p>
+        <p>SERVER NAME: {{.Name}}</p>
+        <p>STATUS: [[status]]</p>
         <form @submit.prevent="sendMsg">
             <input type="text" v-model="text" />
             <input type="submit" value="send">
         </form>
         <div>
-            <p v-for="m in msgs">{{ m }}</p>
+            <p v-for="m in msgs">[[ m ]]</p>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
     <script>
         let vue = new Vue({
             el: '#app',
+            delimiters: [ "[[", "]]"],
             data: {
                 ws: null,
                 status: "-",
@@ -54,3 +57,4 @@
     </script>
 </body>
 </html>
+{{end}}
