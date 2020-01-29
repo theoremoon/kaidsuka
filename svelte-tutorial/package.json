@@ -1,0 +1,19 @@
+{
+  "name": "svelte-tutorial",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "parcel build index.html",
+    "watch": "parcel watch index.html",
+    "serve": "parcel serve index.html"
+  },
+  "browserslist": [
+    "last 1 chrome versions"
+  ],
+  "devDependencies": {
+    "parcel": "^1.12.4",
+    "parcel-plugin-svelte": "^4.0.5",
+    "svelte": "^3.16.5"
+  }
+}

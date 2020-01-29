@@ -1,0 +1,21 @@
+name: server
+version: 0.1.0
+
+authors:
+  - theoremoon <theoldmoon0602@gmail.com>
+
+targets:
+  server:
+    main: src/server.cr
+
+crystal: 0.32.1
+
+license: MIT
+
+dependencies:
+  kemal:
+    github: kemalcr/kemal
+  sqlite3:
+    github: crystal-lang/crystal-sqlite3
+  kemal-session:
+    github: kemalcr/kemal-session
