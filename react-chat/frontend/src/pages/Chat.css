@@ -1,0 +1,14 @@
+.text {
+    padding-left: 4em;
+}
+.user {
+    font-weight: bold;
+}
+.postedat {
+    font-size: 80%;
+    color: gray;
+}
+.messages {
+    height: 60vh;
+    overflow: auto;
+}

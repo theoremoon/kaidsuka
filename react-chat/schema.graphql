@@ -1,0 +1,33 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type User {
+  username: String!
+}
+
+type Message {
+  id: ID!
+  text: String!
+  edited: Boolean!
+  "posted_at is unix time"
+  posted_at: Int!
+  user: User!
+}
+
+type Query {
+  user: User!
+  getMessages(before: Int, count: Int): [Message!]!
+}
+
+type Mutation {
+  postMessage(text: String!): Message!
+  editMessage(messageId: ID!, text: String!): Message!
+}
+
+type Subscription {
+  newMessage: Message!
+  updatedMessage: Message!
+}
