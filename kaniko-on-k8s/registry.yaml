@@ -1,0 +1,29 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: registry-service
+spec:
+  selector:
+    app: registry
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 5000
+      nodePort: 32000
+      name: registry-http
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: registry-pod
+  labels:
+    app: registry
+spec:
+  containers:
+    - name: registry-container
+      image: registry:2
+      ports:
+        - containerPort: 5000
+
+
