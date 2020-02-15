@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          args:
+            - "--dockerfile=./1/just_login/Dockerfile"
+            - "--context=git://github.com/theoremoon/ctf4y.git#refs/heads/master"
+            - "--destination=registry-service:8080/theoremoon/hello:latest"
+            - "--insecure"
+      restartPolicy: Never
+
