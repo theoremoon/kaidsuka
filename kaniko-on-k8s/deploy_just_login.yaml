@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-serviceaccount
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sample-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: sample-serviceaccount
+  namespace: default
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: deploy-job
+spec:
+  template:
+    spec:
+      serviceAccount: sample-serviceaccount
+      containers:
+        - name: deploy
+          image: docker.io/bitnami/kubectl:latest
+          command: ["sh", "-c", "echo a2luZDogU2VydmljZQphcGlWZXJzaW9uOiB2MQptZXRhZGF0YToKICBuYW1lOiBqdXN0bG9naW4tc2VydmljZQpzcGVjOgogIHNlbGVjdG9yOgogICAgYXBwOiBqdXN0bG9naW4KICB0eXBlOiBOb2RlUG9ydAogIHBvcnRzOgogICAgLSBwcm90b2NvbDogVENQCiAgICAgIHBvcnQ6IDgwMDAKICAgICAgdGFyZ2V0UG9ydDogODg4OAogICAgICBub2RlUG9ydDogMzIwMDEKICAgICAgbmFtZToganVzdGxvZ2luLWh0dHAKLS0tCmtpbmQ6IFBvZAphcGlWZXJzaW9uOiB2MQptZXRhZGF0YToKICBuYW1lOiBqdXN0bG9naW4tcG9kCiAgbGFiZWxzOgogICAgYXBwOiBqdXN0bG9naW4Kc3BlYzoKICBjb250YWluZXJzOgogICAgLSBuYW1lOiBqdXN0bG9naW4tcG9kCiAgICAgIGltYWdlOiByZWdpc3RyeS1zZXJ2aWNlOjgwODAvdGhlb3JlbW9vbi9oZWxsbzpsYXRlc3QKICAgICAgcG9ydHM6CiAgICAgICAgLSBjb250YWluZXJQb3J0OiA4ODg4CgoK | base64 -d | kubectl apply -f -"]
+      restartPolicy: Never
+

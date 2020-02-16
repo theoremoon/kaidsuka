@@ -1,0 +1,29 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: justlogin-service
+spec:
+  selector:
+    app: justlogin
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8888
+      nodePort: 32001
+      name: justlogin-http
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: justlogin-pod
+  labels:
+    app: justlogin
+spec:
+  containers:
+    - name: justlogin-pod
+      image: registry-service:8080/theoremoon/hello:latest
+      ports:
+        - containerPort: 8888
+
+
