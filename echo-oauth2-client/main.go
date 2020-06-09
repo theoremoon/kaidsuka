@@ -55,6 +55,7 @@ func run() error {
 	tokenURL := flag.String("tokenurl", "", "OAuth2 Authentication get token URL")
 	serverID := flag.String("server-id", "", "Discord Server ID to invite users")
 	scope := flag.String("scope", "identify", "")
+	permission := flag.String("permission", "", "Bot required Permission Number")
 
 	flag.Usage = func() {
 		fmt.Printf("Usage:\n\n")
@@ -96,8 +97,15 @@ func run() error {
 		},
 		ServerID: *serverID,
 	}
-	url := srv.OAuthConf.AuthCodeURL("state", oauth2.AccessTypeOnline)
+
+	var url string
+	if permission == nil || *permission == "" {
+		url = srv.OAuthConf.AuthCodeURL("state", oauth2.AccessTypeOnline)
+	} else {
+		url = srv.OAuthConf.AuthCodeURL("state", oauth2.AccessTypeOnline, oauth2.SetAuthURLParam("permission", *permission))
+	}
 	log.Println(url)
+
 	return srv.Start(":5000")
 }
 

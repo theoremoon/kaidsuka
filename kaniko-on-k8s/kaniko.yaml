@@ -11,7 +11,8 @@ spec:
           args:
             - "--dockerfile=./1/just_login/Dockerfile"
             - "--context=git://github.com/theoremoon/ctf4y.git#refs/heads/master"
-            - "--destination=registry-service:8080/theoremoon/hello:latest"
+            - "--destination=registry-service:5000/theoremoon/hello:latest"
             - "--insecure"
       restartPolicy: Never
+  backoffLimit: 0
 

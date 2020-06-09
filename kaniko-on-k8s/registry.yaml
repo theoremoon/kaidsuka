@@ -5,25 +5,29 @@ metadata:
 spec:
   selector:
     app: registry
-  type: NodePort
+  type: ClusterIP
   ports:
     - protocol: TCP
-      port: 8080
+      port: 5000
       targetPort: 5000
-      nodePort: 32000
-      name: registry-http
 ---
-kind: Pod
-apiVersion: v1
+kind: Deployment
+apiVersion: apps/v1
 metadata:
-  name: registry-pod
-  labels:
-    app: registry
+  name: registry-deployment
 spec:
-  containers:
-    - name: registry-container
-      image: registry:2
-      ports:
-        - containerPort: 5000
-
-
+  selector:
+    matchLabels:
+      app: registry
+  replicas: 1
+  template:
+    metadata:
+      name: registry-pod
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry-container
+          image: registry:2
+          ports:
+            - containerPort: 5000
