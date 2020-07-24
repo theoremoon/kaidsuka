@@ -1,0 +1,33 @@
+---
+- become: yes
+  hosts: all
+  tasks:
+    - name: Download etcd binary
+      unarchive:
+        src: https://storage.googleapis.com/etcd/v3.4.10/etcd-v3.4.10-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        mode: '0755'
+        owner: root
+        group: root
+        extra_opts:
+          - --strip=1
+          - --wildcards
+          - 'etcd*'
+        remote_src: True
+      become: yes
+
+    - name: Set service unit
+      template:
+        src: ./etcd.service
+        dest: /etc/systemd/system/etcd.service
+        owner: root
+        group: root
+      become: yes
+
+    - name: Start etcd
+      systemd:
+        state: started
+        name: etcd
+        daemon_reload: yes
+      become: yes
+
